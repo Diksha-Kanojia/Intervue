@@ -3,19 +3,25 @@ echo ================================
 echo Push to GitHub - Intervue App
 echo ================================
 echo.
-echo Please replace YOUR_USERNAME with your actual GitHub username
-echo.
 
 cd /d "%~dp0"
 
 set /p username=Enter your GitHub username: 
 
 echo.
+echo Checking if remote already exists...
+git remote remove origin >nul 2>&1
+
 echo Adding GitHub remote...
 git remote add origin https://github.com/%username%/Intervue.git
 
 echo.
+echo Verifying remote...
+git remote -v
+
+echo.
 echo Pushing code to GitHub...
+echo (You may need to enter your GitHub credentials)
 git push -u origin main
 
 if %errorlevel% equ 0 (
