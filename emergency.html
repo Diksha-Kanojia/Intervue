@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervue Poll</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tag {
+            background-color: #7B61FF;
+            color: white;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 14px;
+            margin-bottom: 64px;
+        }
+        .heading {
+            font-size: 28px;
+            font-weight: 700;
+            color: black;
+            letter-spacing: -0.5px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .role-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+        .role-box {
+            width: 300px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            text-align: left;
+            background-color: white;
+            transition: border-color 0.2s ease;
+        }
+        .role-box:hover {
+            border-color: #7B61FF;
+        }
+        .role-box.selected {
+            border-color: #7B61FF;
+        }
+        .role-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .role-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        .btn-continue {
+            background-color: #7B61FF;
+            color: white;
+            height: 44px;
+            width: 170px;
+            border-radius: 34px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-continue:hover {
+            background-color: #6B51FF;
+        }
+        .btn-continue:disabled {
+            background-color: #A0AEC0;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tag">Intervue Poll</div>
+        
+        <h1 class="heading">Welcome to the Live Polling System</h1>
+        
+        <div class="role-container">
+            <div class="role-box" id="student-role" onclick="selectRole('student')">
+                <div class="role-title">I'm a Student</div>
+                <div class="role-desc">Answer questions, participate in polls, and see your results in real-time</div>
+            </div>
+            
+            <div class="role-box" id="teacher-role" onclick="selectRole('teacher')">
+                <div class="role-title">I'm a Teacher</div>
+                <div class="role-desc">Create polls, ask questions, and view student responses in real-time</div>
+            </div>
+        </div>
+        
+        <button class="btn-continue" id="continue-btn" disabled onclick="continueToNext()">Continue</button>
+    </div>
+
+    <script>
+        let selectedRole = null;
+        
+        function selectRole(role) {
+            selectedRole = role;
+            
+            // Update UI
+            document.getElementById('student-role').classList.remove('selected');
+            document.getElementById('teacher-role').classList.remove('selected');
+            document.getElementById(`${role}-role`).classList.add('selected');
+            
+            // Enable button
+            document.getElementById('continue-btn').disabled = false;
+        }
+        
+        function continueToNext() {
+            if (selectedRole === 'student') {
+                alert('Student role selected! In the full application, this would navigate to /student-onboarding');
+                // In real app: window.location.href = '/student-onboarding';
+            } else if (selectedRole === 'teacher') {
+                alert('Teacher role selected! In the full application, this would navigate to /teacher-create-poll');
+                // In real app: window.location.href = '/teacher-create-poll';
+            }
+        }
+    </script>
+</body>
+</html>

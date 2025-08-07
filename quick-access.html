@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervue Polling System - Quick Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .links {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .link {
+            display: block;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .primary {
+            background: #8b5cf6;
+            font-size: 1.2em;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .instructions {
+            margin-top: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗳️ Intervue Polling System</h1>
+        
+        <div class="status" id="status">
+            <strong>Status:</strong> Checking server...
+        </div>
+
+        <div class="links">
+            <a href="http://localhost:3000" class="link primary" onclick="checkServer()">
+                🚀 Launch Main Application
+            </a>
+            
+            <a href="http://localhost:3000/student-onboarding" class="link">
+                👨‍🎓 Student Login
+            </a>
+            
+            <a href="http://localhost:3000/teacher-create-poll" class="link">
+                👩‍🏫 Teacher - Create Poll
+            </a>
+        </div>
+
+        <div class="instructions">
+            <p><strong>Quick Start:</strong></p>
+            <p>1. Run <code>launch.bat</code> or <code>start.bat</code> first</p>
+            <p>2. Wait for the server to start</p>
+            <p>3. Click "Launch Main Application" above</p>
+            <br>
+            <p><strong>Features:</strong></p>
+            <p>✅ Queue-based voting system prevents race conditions</p>
+            <p>✅ Real-time updates via BroadcastChannel + polling fallback</p>
+        </div>
+    </div>
+
+    <script>
+        async function checkServer() {
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    document.getElementById('status').innerHTML = 
+                        '<strong>Status:</strong> ✅ Server is running!';
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = 
+                    '<strong>Status:</strong> ❌ Server not running. Please start it first!';
+            }
+        }
+
+        // Check server status on load
+        setTimeout(checkServer, 1000);
+        
+        // Check every 5 seconds
+        setInterval(checkServer, 5000);
+    </script>
+</body>
+</html>

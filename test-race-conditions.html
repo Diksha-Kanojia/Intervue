@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Bridge Test - Race Condition Testing</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        button { margin: 5px; padding: 10px 20px; }
+        .results { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+        .log { background: #000; color: #0f0; padding: 10px; font-family: monospace; height: 200px; overflow-y: scroll; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>🗳️ Poll Bridge Test - Race Condition Testing</h1>
+    
+    <div class="section">
+        <h2>🏗️ Setup</h2>
+        <button onclick="createTestPoll()">Create Test Poll</button>
+        <button onclick="clearData()">Clear All Data</button>
+        <div id="pollInfo" class="results"></div>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Race Condition Test</h2>
+        <p>This simulates multiple students voting at exactly the same time</p>
+        <button onclick="testRaceCondition()">🚀 Test 5 Simultaneous Votes</button>
+        <button onclick="testMassiveRace()">💥 Test 20 Simultaneous Votes</button>
+        <button onclick="testSequentialVotes()">📝 Test Sequential Votes</button>
+        <div id="raceResults" class="results"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Current Results</h2>
+        <button onclick="showResults()">Refresh Results</button>
+        <button onclick="debugSystem()">🔍 Debug System</button>
+        <div id="currentResults" class="results"></div>
+    </div>
+
+    <div class="section">
+        <h2>📝 Console Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="console" class="log"></div>
+    </div>
+
+    <script type="module">
+        // Import our actual pollBridge functions
+        import { deliverPoll, submitAnswer, getResults, getCurrentPoll, debugVotes } from './src/utils/pollBridge.js';
+        
+        // Make functions available globally for buttons
+        window.pollBridge = {
+            deliverPoll,
+            submitAnswer,
+            getResults,
+            getCurrentPoll,
+            debugVotes
+        };
+
+        // Custom console to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('console');
+            const className = type === 'error' ? 'error' : type === 'warn' ? 'error' : 'success';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        console.log = (...args) => {
+            originalLog(...args);
+            addToLog(args.join(' '), 'log');
+        };
+
+        console.error = (...args) => {
+            originalError(...args);
+            addToLog('ERROR: ' + args.join(' '), 'error');
+        };
+
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addToLog('WARN: ' + args.join(' '), 'warn');
+        };
+
+        // Test functions
+        window.createTestPoll = function() {
+            const poll = {
+                id: `test-poll-${Date.now()}`,
+                question: "What is your favorite programming language?",
+                options: [
+                    { id: 1, text: "JavaScript" },
+                    { id: 2, text: "Python" },
+                    { id: 3, text: "Java" },
+                    { id: 4, text: "C++" }
+                ],
+                duration: 120,
+                timestamp: Date.now()
+            };
+
+            console.log('🚀 Creating test poll...');
+            window.pollBridge.deliverPoll(poll);
+            updatePollInfo();
+        };
+
+        window.clearData = function() {
+            console.log('🧹 Clearing all poll data...');
+            localStorage.removeItem('currentPoll');
+            localStorage.removeItem('pollVotes');
+            localStorage.removeItem('pollResults');
+            localStorage.removeItem('pollEvent');
+            localStorage.removeItem('resultsEvent');
+            updatePollInfo();
+            showResults();
+        };
+
+        window.testRaceCondition = async function() {
+            console.log('⚡ Starting race condition test with 5 simultaneous votes...');
+            
+            const students = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'];
+            const options = ['JavaScript', 'Python', 'Java', 'C++'];
+            
+            // Create promises for simultaneous submission
+            const promises = students.map((student, index) => {
+                const option = options[index % options.length];
+                console.log(`📤 Queuing vote: ${student} -> ${option}`);
+                return window.pollBridge.submitAnswer(option, student);
+            });
+
+            try {
+                console.log('🏁 Starting simultaneous vote submission...');
+                const results = await Promise.all(promises);
+                
+                console.log('✅ All votes completed!');
+                results.forEach((result, index) => {
+                    if (result.success) {
+                        console.log(`✅ ${students[index]} vote succeeded`);
+                    } else {
+                        console.log(`❌ ${students[index]} vote failed`);
+                    }
+                });
+
+                setTimeout(() => {
+                    showResults();
+                    debugSystem();
+                }, 100);
+
+            } catch (error) {
+                console.error('❌ Race condition test failed:', error);
+            }
+        };
+
+        window.testMassiveRace = async function() {
+            console.log('💥 Starting massive race condition test with 20 simultaneous votes...');
+            
+            const options = ['JavaScript', 'Python', 'Java', 'C++'];
+            const promises = [];
+            
+            // Create 20 students voting simultaneously
+            for (let i = 1; i <= 20; i++) {
+                const student = `Student${i}`;
+                const option = options[i % options.length];
+                console.log(`📤 Queuing vote: ${student} -> ${option}`);
+                promises.push(window.pollBridge.submitAnswer(option, student));
+            }
+
+            try {
+                console.log('🏁 Starting massive simultaneous vote submission...');
+                const startTime = Date.now();
+                const results = await Promise.all(promises);
+                const endTime = Date.now();
+                
+                console.log(`✅ All 20 votes completed in ${endTime - startTime}ms!`);
+                
+                let successCount = 0;
+                results.forEach((result, index) => {
+                    if (result.success) {
+                        successCount++;
+                    } else {
+                        console.log(`❌ Student${index + 1} vote failed`);
+                    }
+                });
+
+                console.log(`📊 Success rate: ${successCount}/20 (${(successCount/20*100).toFixed(1)}%)`);
+
+                setTimeout(() => {
+                    showResults();
+                    debugSystem();
+                }, 100);
+
+            } catch (error) {
+                console.error('❌ Massive race condition test failed:', error);
+            }
+        };
+
+        window.testSequentialVotes = async function() {
+            console.log('📝 Starting sequential vote test...');
+            
+            const students = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'];
+            const options = ['JavaScript', 'Python', 'Java', 'C++'];
+            
+            for (let i = 0; i < students.length; i++) {
+                const student = students[i];
+                const option = options[i % options.length];
+                
+                try {
+                    console.log(`📤 Submitting sequential vote: ${student} -> ${option}`);
+                    const result = await window.pollBridge.submitAnswer(option, student);
+                    
+                    if (result.success) {
+                        console.log(`✅ ${student} vote succeeded`);
+                    } else {
+                        console.log(`❌ ${student} vote failed`);
+                    }
+                    
+                    // Small delay between votes
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                } catch (error) {
+                    console.error(`❌ ${student} vote error:`, error);
+                }
+            }
+
+            setTimeout(() => {
+                showResults();
+                debugSystem();
+            }, 100);
+        };
+
+        window.showResults = function() {
+            const results = window.pollBridge.getResults();
+            const votes = localStorage.getItem('pollVotes');
+            const parsedVotes = votes ? JSON.parse(votes) : [];
+            
+            let html = '<h3>📊 Current Results:</h3>';
+            
+            if (Object.keys(results).length === 0) {
+                html += '<p>No results yet</p>';
+            } else {
+                for (const [option, data] of Object.entries(results)) {
+                    html += `<p><strong>${option}:</strong> ${data.count} votes (${data.students.join(', ')})</p>`;
+                }
+            }
+            
+            html += `<p><strong>Total votes recorded:</strong> ${parsedVotes.length}</p>`;
+            html += `<p><strong>Unique voters:</strong> ${new Set(parsedVotes.map(v => v.studentName)).size}</p>`;
+            
+            document.getElementById('currentResults').innerHTML = html;
+        };
+
+        window.debugSystem = function() {
+            const debug = window.pollBridge.debugVotes();
+            console.log('🔍 === SYSTEM DEBUG ===');
+            console.log('Poll:', debug.poll);
+            console.log('Votes:', debug.votes);
+            console.log('Results:', debug.results);
+            console.log('Queue Status:', debug.queueStatus);
+            
+            document.getElementById('raceResults').innerHTML = `
+                <h3>🔍 Debug Info:</h3>
+                <p><strong>Queue Length:</strong> ${debug.queueStatus.queueLength}</p>
+                <p><strong>Is Processing:</strong> ${debug.queueStatus.isProcessing}</p>
+                <p><strong>Total Votes in Storage:</strong> ${debug.votes.length}</p>
+                <p><strong>Unique Students:</strong> ${new Set(debug.votes.map(v => v.studentName)).size}</p>
+            `;
+        };
+
+        window.updatePollInfo = function() {
+            const poll = window.pollBridge.getCurrentPoll();
+            const html = poll 
+                ? `<h3>📋 Current Poll:</h3><p><strong>Question:</strong> ${poll.question}</p><p><strong>Options:</strong> ${poll.options.map(o => o.text).join(', ')}</p>`
+                : '<p>No poll available. Create one first!</p>';
+            document.getElementById('pollInfo').innerHTML = html;
+        };
+
+        window.clearLog = function() {
+            document.getElementById('console').innerHTML = '';
+        };
+
+        // Initialize
+        console.log('🚀 Poll Bridge Test initialized');
+        updatePollInfo();
+        showResults();
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+@echo off
+echo Starting the server...
+
+cd server
+echo Checking for backend dependencies...
+if not exist node_modules (
+    echo Installing backend dependencies...
+    call npm install express socket.io cors dotenv
+)
+
+echo.
+echo Starting backend server...
+call node server.js

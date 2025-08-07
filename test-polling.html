@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Poll System Test</title>
+</head>
+<body>
+    <h1>Poll System Test</h1>
+    <div>
+        <h2>Teacher Controls</h2>
+        <button onclick="createPoll()">Create New Poll</button>
+        <button onclick="viewResults()">View Results</button>
+    </div>
+    
+    <div>
+        <h2>Student Controls</h2>
+        <button onclick="voteA()">Vote A</button>
+        <button onclick="voteB()">Vote B</button>
+        <button onclick="checkForPoll()">Check for New Poll</button>
+    </div>
+    
+    <div>
+        <h2>Current State</h2>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Simple poll bridge functions for testing
+        function createPoll() {
+            const poll = {
+                id: `poll-${Date.now()}`,
+                question: "Test Question?",
+                options: [
+                    { text: "Option A" },
+                    { text: "Option B" }
+                ],
+                timestamp: Date.now()
+            };
+            
+            console.log('Creating poll:', poll);
+            localStorage.setItem('currentPoll', JSON.stringify(poll));
+            localStorage.setItem('pollTimestamp', Date.now().toString());
+            
+            // Clear previous votes
+            localStorage.removeItem('pollVotes');
+            localStorage.removeItem('pollResults');
+            
+            window.dispatchEvent(new CustomEvent('poll-delivered', { detail: poll }));
+            updateStatus();
+        }
+        
+        function voteA() {
+            vote('Option A', 'Student1');
+        }
+        
+        function voteB() {
+            vote('Option B', 'Student2');
+        }
+        
+        function vote(option, student) {
+            console.log(`${student} voting for ${option}`);
+            
+            // Get existing votes
+            let votes = [];
+            const storedVotes = localStorage.getItem('pollVotes');
+            if (storedVotes) {
+                votes = JSON.parse(storedVotes);
+            }
+            
+            // Remove previous vote from this student
+            votes = votes.filter(v => v.studentName !== student);
+            
+            // Add new vote
+            votes.push({
+                studentName: student,
+                selectedOption: option,
+                timestamp: Date.now(),
+                id: `${student}-${Date.now()}`
+            });
+            
+            localStorage.setItem('pollVotes', JSON.stringify(votes));
+            
+            // Calculate results
+            const poll = JSON.parse(localStorage.getItem('currentPoll'));
+            const results = {};
+            
+            if (poll && poll.options) {
+                poll.options.forEach(opt => {
+                    results[opt.text] = { count: 0, students: [] };
+                });
+                
+                votes.forEach(vote => {
+                    if (results[vote.selectedOption]) {
+                        results[vote.selectedOption].count++;
+                        results[vote.selectedOption].students.push(vote.studentName);
+                    }
+                });
+            }
+            
+            localStorage.setItem('pollResults', JSON.stringify(results));
+            window.dispatchEvent(new CustomEvent('results-updated', { detail: results }));
+            updateStatus();
+        }
+        
+        function viewResults() {
+            const results = localStorage.getItem('pollResults');
+            console.log('Current results:', results);
+            updateStatus();
+        }
+        
+        function checkForPoll() {
+            const poll = localStorage.getItem('currentPoll');
+            console.log('Current poll:', poll);
+            updateStatus();
+        }
+        
+        function updateStatus() {
+            const poll = localStorage.getItem('currentPoll');
+            const votes = localStorage.getItem('pollVotes');
+            const results = localStorage.getItem('pollResults');
+            
+            document.getElementById('status').innerHTML = `
+                <p><strong>Current Poll:</strong> ${poll || 'None'}</p>
+                <p><strong>Votes:</strong> ${votes || 'None'}</p>
+                <p><strong>Results:</strong> ${results || 'None'}</p>
+            `;
+        }
+        
+        // Listen for events
+        window.addEventListener('poll-delivered', (e) => {
+            console.log('Poll delivered event:', e.detail);
+            updateStatus();
+        });
+        
+        window.addEventListener('results-updated', (e) => {
+            console.log('Results updated event:', e.detail);
+            updateStatus();
+        });
+        
+        // Initial status
+        updateStatus();
+    </script>
+</body>
+</html>
