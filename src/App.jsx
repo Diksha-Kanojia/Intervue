@@ -8,13 +8,12 @@ import StudentResults from './components/StudentResults';
 import StudentWaiting from './components/StudentWaiting';
 import TeacherPollPage from './components/TeacherPollPage';
 import TeacherResults from './components/TeacherResults';
-import theme from './theme';
 
 function App() {
   console.log('App component rendering');
   
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
