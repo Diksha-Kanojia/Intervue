@@ -1,0 +1,13 @@
+FORCE VERCEL REDEPLOY - TIMESTAMP: 2025-08-07 21:50:00
+
+CRITICAL FIX APPLIED:
+- Fixed index.html template (removed hardcoded /Intervue/ paths)
+- Build now generates correct /assets/ paths
+- Vercel should deploy successfully
+
+CHANGES MADE:
+1. index.html restored to proper template format
+2. vercel.json configured with explicit build command
+3. package.json build script updated
+
+This file forces a new commit to trigger Vercel redeploy.

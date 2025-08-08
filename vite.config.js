@@ -8,5 +8,14 @@ export default defineConfig({
     port: 3000,
     host: true
   },
-  base: process.env.NODE_ENV === 'production' ? '/Intervue/' : '/'
+  base: '/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  }
 })

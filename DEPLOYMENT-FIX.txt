@@ -1,0 +1,7 @@
+This is a simple trigger file to force a new Git commit.
+Timestamp: 2025-08-07 21:27:00
+
+The package.json has been updated with:
+"build": "vite build --base=/"
+
+This should fix the Vercel deployment issue.

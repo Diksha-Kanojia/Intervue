@@ -1,0 +1,10 @@
+VERCEL DEPLOYMENT FIX - TIMESTAMP: 2025-08-07 21:47:00
+
+The index.html file has been restored to proper template format.
+This should fix the Vercel build issues.
+
+Changes made:
+- Fixed index.html template (removed hardcoded /Intervue/assets/ paths)
+- Vercel build should now work with /assets/ paths
+
+This file forces a new commit to trigger Vercel deployment.
